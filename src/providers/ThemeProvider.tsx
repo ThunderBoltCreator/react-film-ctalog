@@ -1,35 +1,14 @@
-import React, { createContext, PropsWithChildren, useState } from "react";
+import { createContext, ReactNode, useMemo, useState } from 'react'
+import { ThemeProviderType } from 'types/types'
 
-export const ThemeContext = createContext({});
+export const ThemeContext = createContext<ThemeProviderType>(
+	{} as ThemeProviderType
+)
 
-export const themes = {
-  dark: "dark",
-  light: "light",
-};
+export const ThemeProvider = ({ children }: { children: ReactNode }) => {
+	const [isDark, setIsDark] = useState(false)
 
-const getTheme = () => {
-  const theme = `${window.localStorage.getItem("theme")}`;
-  if (Object.values(themes).includes(theme)) return theme;
+	const theme = useMemo(() => ({ isDark, setIsDark }), [isDark])
 
-  const userMedia = window.matchMedia("(prefers-color-scheme: light)");
-  if (userMedia.matches) return themes.light;
-
-  return themes.dark;
-};
-
-const ThemeProvider: React.FC<PropsWithChildren> = ({ children }) => {
-  const [theme, setTheme] = useState(getTheme);
-
-  React.useEffect(() => {
-    document.documentElement.dataset.theme = theme;
-    localStorage.setItem("theme", theme);
-  }, [theme]);
-
-  return (
-    <ThemeContext.Provider value={{ theme, setTheme }}>
-      {children}
-    </ThemeContext.Provider>
-  );
-};
-
-export { ThemeProvider };
+	return <ThemeContext.Provider value={theme}>{children}</ThemeContext.Provider>
+}
